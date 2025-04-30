@@ -1,0 +1,57 @@
+#include <Arduino.h>
+
+// Определяем символы и их бинарные представления
+const char* symbols[] = {"M", "A", "U", "F", "N", "H"};
+const char* codes[] = {"01", "00", "110", "111", "100", "101"};
+const int numSymbols = 6;
+
+// Функция для кодирования строки
+String encode(const String& input) {
+String encoded = "";
+for (int i = 0; i < input.length(); i++) {
+char currentChar = input.charAt(i);
+for (int j = 0; j < numSymbols; j++) {
+if (currentChar == symbols[j][0]) { // Сравниваем с первым символом в массиве
+encoded += codes[j]; break; }
+}
+} return encoded; }
+
+// Функция для декодирования строки
+String decode(const String& input) {
+String decoded = "";
+String temp = "";
+for (int i = 0; i < input.length(); i++) {
+temp += input.charAt(i);
+for (int j = 0; j < numSymbols; j++) {
+if (temp == codes[j]) {
+decoded += symbols[j][0]; // Добавляем символ
+temp = ""; // Сбрасываем временную строку
+break; }
+}
+} return decoded; }
+
+void setup() {
+Serial.begin(115200);
+Serial.println("Введите строку для кодирования (M, A, U, F, N, H) или декодирования (0 и 1):");
+}
+
+void loop() {
+if (Serial.available() > 0) {
+String input = Serial.readStringUntil('\n'); // Читаем строку до символа новой строки
+input.trim(); // Убираем лишние пробелы
+// Проверяем, состоит ли строка из 0 и 1
+if (input.indexOf('0') != -1 || input.indexOf('1') != -1) {
+// Проверяем, состоит ли строка только из 0 и 1
+bool isBinary = true;
+for (int i = 0; i < input.length(); i++) {
+if (input.charAt(i) != '0' && input.charAt(i) != '1') {
+isBinary = false; break; }
+}
+if (isBinary) { String decoded = decode(input);
+Serial.print("Decoded: "); Serial.println(decoded);
+} else { Serial.println("Ошибка: строка должна содержать только 0 и 1 для декодирования."); }
+} else { String encoded = encode(input); // Кодируем строку
+Serial.print("Encoded: "); Serial.println(encoded); }
+}
+
+}
